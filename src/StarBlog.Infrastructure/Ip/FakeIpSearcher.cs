@@ -13,4 +13,7 @@ public sealed class FakeIpSearcher : ISearcher {
     public string? Search(uint ipAddress) => FakeResult;
 
     public int IoCount => 0;
+    public void Dispose() {
+        // TODO release managed resources here
+    }
 }
