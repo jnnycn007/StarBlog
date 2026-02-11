@@ -9,7 +9,7 @@ using StarBlog.Web.Extensions;
 using StarBlog.Web.Filters;
 using StarBlog.Web.Middlewares;
 using StarBlog.Web.Services;
-using StarBlog.Web.Services.EmailQueueServices;
+using StarBlog.Web.Services.OutboxServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -109,8 +109,6 @@ builder.Services.AddImageSharp();
 // 注册自定义服务
 builder.Services.AddSingleton<CommonService>();
 builder.Services.AddSingleton<EmailService>();
-builder.Services.AddSingleton<EmailSendQueueService>();
-builder.Services.AddHostedService<EmailSendWorker>();
 builder.Services.AddSingleton<MessageService>();
 builder.Services.AddSingleton<ThemeService>();
 builder.Services.AddSingleton<TempFilterService>();
@@ -127,6 +125,12 @@ builder.Services.AddScoped<SeoService>();
 builder.Services.AddScoped<StructuredDataService>();
 builder.Services.AddScoped<ImageSeoService>();
 builder.Services.AddScoped<SitemapService>();
+
+builder.Services.Configure<OutboxOptions>(builder.Configuration.GetSection("Outbox"));
+builder.Services.AddScoped<OutboxService>();
+builder.Services.AddScoped<OutboxProcessor>();
+builder.Services.AddScoped<IOutboxHandler, EmailSendOutboxHandler>();
+builder.Services.AddHostedService<OutboxWorker>();
 
 // 设置请求最大大小
 builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = long.MaxValue; });

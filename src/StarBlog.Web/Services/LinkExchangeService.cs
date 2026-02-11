@@ -1,7 +1,7 @@
 using System.Text;
 using FreeSql;
 using StarBlog.Data.Models;
-using StarBlog.Web.Services.EmailQueueServices;
+using StarBlog.Web.Services.OutboxServices;
 
 namespace StarBlog.Web.Services;
 
@@ -11,12 +11,12 @@ namespace StarBlog.Web.Services;
 public class LinkExchangeService {
     private readonly IBaseRepository<LinkExchange> _repo;
     private readonly LinkService _linkService;
-    private readonly EmailSendQueueService _emailQueue;
+    private readonly OutboxService _outboxService;
 
-    public LinkExchangeService(IBaseRepository<LinkExchange> repo, LinkService linkService, EmailSendQueueService emailQueue) {
+    public LinkExchangeService(IBaseRepository<LinkExchange> repo, LinkService linkService, OutboxService outboxService) {
         _repo = repo;
         _linkService = linkService;
-        _emailQueue = emailQueue;
+        _outboxService = outboxService;
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public class LinkExchangeService {
         return await _repo.DeleteAsync(a => a.Id == id);
     }
 
-    public Task SendEmail(LinkExchange item, string subject, string message) {
+    public async Task SendEmail(LinkExchange item, string subject, string message) {
         var sb = new StringBuilder();
         sb.AppendLine($"<p>{message}</p>");
         sb.AppendLine($"<br>");
@@ -90,13 +90,13 @@ public class LinkExchangeService {
         if (item.Reason != null) sb.AppendLine($"<p>补充信息：{item.Reason}</p>");
         sb.AppendLine($"<br>");
         sb.AppendLine($"<br>");
-        _emailQueue.Enqueue(
+        await _outboxService.EnqueueEmailAsync(
             $"[StarBlog]{subject}",
             sb.ToString(),
             item.WebMaster,
-            item.Email
+            item.Email,
+            dedupKey: $"link-exchange:{item.Id}:{subject}"
         );
-        return Task.CompletedTask;
     }
 
     public async Task SendEmailOnAdd(LinkExchange item) {
