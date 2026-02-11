@@ -1,7 +1,7 @@
 using System.Net;
 using IP2Region.Net.Abstractions;
 
-namespace StarBlog.Contrib.Ip;
+namespace StarBlog.Infrastructure.Ip;
 
 public sealed class FakeIpSearcher : ISearcher {
     private const string FakeResult = "0|0|0|0|0";

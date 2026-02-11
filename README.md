@@ -105,7 +105,7 @@ StarBlog 不仅仅是一个博客系统，它正在发展成为一个完整的�
 ```
 StarBlog/
 ├── src/
-│   ├── StarBlog.Contrib/   # 通用工具和扩展（诊断/杂项能力）
+│   ├── StarBlog.Infrastructure/ # 通用基础设施（诊断/杂项能力）
 │   ├── StarBlog.Content/   # 内容处理（Markdown/ToC/导入处理等）
 │   ├── StarBlog.Data/      # 数据模型与数据访问层（EF Core + FreeSql）
 │   └── StarBlog.Web/       # 主 Web 应用（MVC/Razor + API）

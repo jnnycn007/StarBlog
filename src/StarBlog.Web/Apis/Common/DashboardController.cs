@@ -1,7 +1,7 @@
-﻿using CodeLab.Share.ViewModels.Response;
+using CodeLab.Share.ViewModels.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StarBlog.Contrib.CLRStats;
+using StarBlog.Infrastructure.CLRStats;
 using StarBlog.Web.Extensions;
 
 namespace StarBlog.Web.Apis.Common;

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Threading;
 
-namespace StarBlog.Contrib.CLRStats;
+namespace StarBlog.Infrastructure.CLRStats;
 
 public class CLRStatsModel {
     private static readonly ServerRequest serverRequest = new ServerRequest();

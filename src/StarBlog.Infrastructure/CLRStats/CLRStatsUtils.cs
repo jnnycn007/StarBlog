@@ -1,4 +1,4 @@
-﻿namespace StarBlog.Contrib.CLRStats;
+namespace StarBlog.Infrastructure.CLRStats;
 
 /// <summary>
 /// 获取一个统计 .NET 应用资源使用情况的插件，包含：CPU 使用率、GC、线程情况，支持通过 Web 请求获取状态信息（可以自定义访问路径和身份验证），数据将以 JSON 格式返回。

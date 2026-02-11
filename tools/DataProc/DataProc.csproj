@@ -65,7 +65,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\StarBlog.Data\StarBlog.Data.csproj" />
-      <ProjectReference Include="..\..\src\StarBlog.Contrib\StarBlog.Contrib.csproj" />
+      <ProjectReference Include="..\..\src\StarBlog.Infrastructure\StarBlog.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

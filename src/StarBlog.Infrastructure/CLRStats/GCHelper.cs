@@ -1,4 +1,4 @@
-﻿namespace StarBlog.Contrib.CLRStats;
+namespace StarBlog.Infrastructure.CLRStats;
 
 internal static class GCHelper {
     private static long _prevGen0CollectCount;

@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{D71DA310-8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2FA94B80-AA27-4B92-9313-FB0311BCCEBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarBlog.Contrib", "src\StarBlog.Contrib\StarBlog.Contrib.csproj", "{4337439B-9B3C-40A8-B73B-B32842DEDD25}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarBlog.Infrastructure", "src\StarBlog.Infrastructure\StarBlog.Infrastructure.csproj", "{4337439B-9B3C-40A8-B73B-B32842DEDD25}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarBlog.Data", "src\StarBlog.Data\StarBlog.Data.csproj", "{C6AD7910-E5E5-4389-B471-7424B7DD7D02}"
 EndProject

@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
-namespace StarBlog.Contrib.CLRStats;
+namespace StarBlog.Infrastructure.CLRStats;
 
 internal static class CpuHelper {
     private const int interval = 1000;

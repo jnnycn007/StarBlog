@@ -5,6 +5,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
+        <AssemblyName>StarBlog.Infrastructure</AssemblyName>
+        <RootNamespace>StarBlog.Infrastructure</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

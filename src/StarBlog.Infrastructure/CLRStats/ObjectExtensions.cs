@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace StarBlog.Contrib.CLRStats;
+namespace StarBlog.Infrastructure.CLRStats;
 
 /// <summary>
 /// 根据原来代码的基础魔改了一下，By DealiAxy，2022-6-11

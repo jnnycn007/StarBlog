@@ -33,7 +33,7 @@ if (!string.IsNullOrEmpty(ip2RegionPath) && File.Exists(ip2RegionPath)) {
     ));
 }
 else {
-    app.Services.AddSingleton<ISearcher>(new StarBlog.Contrib.Ip.FakeIpSearcher());
+    app.Services.AddSingleton<ISearcher>(new StarBlog.Infrastructure.Ip.FakeIpSearcher());
 }
 
 app.Services.AddAutoMapper(typeof(Program));

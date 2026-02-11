@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarBlog.Data", "src\StarBlog.Data\StarBlog.Data.csproj", "{EAAB2D2F-0ADE-4094-86F0-E1585B7384C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarBlog.Contrib", "src\StarBlog.Contrib\StarBlog.Contrib.csproj", "{733E55C7-CB5B-4178-99E7-77A753C16FC1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarBlog.Infrastructure", "src\StarBlog.Infrastructure\StarBlog.Infrastructure.csproj", "{733E55C7-CB5B-4178-99E7-77A753C16FC1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlogImageOptimizer", "tools\BlogImageOptimizer\BlogImageOptimizer.csproj", "{A627D6BB-0E1C-4E26-B1EF-BF4B67985837}"
 EndProject
