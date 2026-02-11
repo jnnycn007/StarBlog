@@ -1,9 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using CodeLab.Share.Extensions;
 using CodeLab.Share.ViewModels.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StarBlog.Share.Utils;
+using StarBlog.Content.Utils;
 using StarBlog.Data.Models;
 using StarBlog.Web.Extensions;
 using StarBlog.Web.Services;

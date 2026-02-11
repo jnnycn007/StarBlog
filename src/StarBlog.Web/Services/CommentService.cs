@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using CodeLab.Share.Extensions;
@@ -6,7 +6,7 @@ using CodeLab.Share.ViewModels;
 using FreeSql;
 using Microsoft.Extensions.Caching.Memory;
 using StarBlog.Data.Models;
-using StarBlog.Share.Utils;
+using StarBlog.Content.Utils;
 using StarBlog.Web.Criteria;
 using X.PagedList;
 

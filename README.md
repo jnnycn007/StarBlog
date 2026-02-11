@@ -1,4 +1,4 @@
-﻿# StarBlog
+# StarBlog
 
 ![](./docs/images/logo.jpg)
 
@@ -104,18 +104,23 @@ StarBlog 不仅仅是一个博客系统，它正在发展成为一个完整的�
 
 ```
 StarBlog/
-├── StarBlog.Contrib/       # 通用工具和扩展
-├── StarBlog.Data/          # 数据模型和数据访问层
-├── StarBlog.Migrate/       # 博客文章导入 CLI 工具
-├── StarBlog.Share/         # 共享组件和工具类
-└── StarBlog.Web/           # 主 Web 应用项目
+├── src/
+│   ├── StarBlog.Contrib/   # 通用工具和扩展（诊断/杂项能力）
+│   ├── StarBlog.Content/   # 内容处理（Markdown/ToC/导入处理等）
+│   ├── StarBlog.Data/      # 数据模型与数据访问层（EF Core + FreeSql）
+│   └── StarBlog.Web/       # 主 Web 应用（MVC/Razor + API）
+├── tools/
+│   ├── MarkdownImporter/   # 博客文章导入 CLI 工具（原 StarBlog.Migrate）
+│   ├── DataProc/           # 数据处理工具（访问日志补全/图片优化/摘要等）
+│   └── BlogImageOptimizer/ # 图片优化工具
+└── demo/                   # 演示/实验项目（与主产品隔离）
 ```
 
 ## 🚀 快速开始
 
 ### 环境要求
 
-- **.NET 6 SDK**
+- **.NET 9 SDK**
 - **Node.js v18** 以上版本 和 **npm/yarn**（用于前端资源管理）
 
 ### 构建步骤
@@ -132,7 +137,7 @@ cd StarBlog
 本项目使用 NPM + Gulp 管理前端静态文件，需要使用 Nodejs 18 以上版本，详情可查看: [AspNetCore开发笔记：使用NPM和gulp管理前端静态文件](https://www.cnblogs.com/deali/p/15905760.html)。
 
 ```bash
-cd StarBlog.Web
+cd src/StarBlog.Web
 npm i -g bower
 npm install  # 或 yarn
 npm install --global gulp-cli
@@ -145,6 +150,11 @@ gulp min
 3. **运行项目**
 
 使用 Visual Studio 或 Rider 打开解决方案，设置 `StarBlog.Web` 为启动项目并运行。
+
+解决方案说明：
+- `StarBlog.sln`：主产品工程（src）
+- `StarBlog.Tools.sln`：工具工程（tools）
+- `StarBlog.Demo.sln`：演示/实验工程（demo）
 
 为了快速启动，本项目默认使用 SQLite 数据库，大部分功能都是使用 FreeSQL 作为 ORM，直接运行项目，无需额外配置 FreeSQL 会自动生成表结构。
 
@@ -163,7 +173,7 @@ dotnet tool install --global dotnet-ef
 同步数据库 (Windows10+)
 
 ```powershell
-cd StarBlog.Data
+cd src/StarBlog.Data
 $env:CONNECTION_STRING = "Data Source=..\StarBlog.Web\app.log.db"
 dotnet ef database update
 ```

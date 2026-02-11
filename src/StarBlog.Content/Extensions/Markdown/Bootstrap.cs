@@ -1,4 +1,4 @@
-﻿using Markdig;
+using Markdig;
 using Markdig.Extensions.Figures;
 using Markdig.Extensions.Tables;
 using Markdig.Renderers;
@@ -6,7 +6,7 @@ using Markdig.Renderers.Html;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 
-namespace StarBlog.Share.Extensions.Markdown;
+namespace StarBlog.Content.Extensions.Markdown;
 
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // This file is licensed under the BSD-Clause 2 license. 

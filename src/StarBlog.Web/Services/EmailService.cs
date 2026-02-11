@@ -1,7 +1,7 @@
-﻿using System.Text;
+using System.Text;
 using MailKit;
 using Microsoft.Extensions.Options;
-using StarBlog.Share.Utils;
+using StarBlog.Content.Utils;
 
 namespace StarBlog.Web.Services;
 

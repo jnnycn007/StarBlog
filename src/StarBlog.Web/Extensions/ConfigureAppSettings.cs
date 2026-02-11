@@ -1,4 +1,4 @@
-﻿using StarBlog.Share.Utils;
+using StarBlog.Content.Utils;
 using StarBlog.Web.Models.Config;
 
 namespace StarBlog.Web.Extensions; 

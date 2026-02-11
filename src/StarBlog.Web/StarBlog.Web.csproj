@@ -17,7 +17,7 @@
     <ItemGroup>
         <ProjectReference Include="..\StarBlog.Contrib\StarBlog.Contrib.csproj" />
         <ProjectReference Include="..\StarBlog.Data\StarBlog.Data.csproj" />
-        <ProjectReference Include="..\StarBlog.Share\StarBlog.Share.csproj" />
+        <ProjectReference Include="..\StarBlog.Content\StarBlog.Content.csproj" />
     </ItemGroup>
 
     <!--  复制静态资源  -->

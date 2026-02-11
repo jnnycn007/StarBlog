@@ -1,12 +1,12 @@
-﻿using System.Net;
+using System.Net;
 using FreeSql;
 using Markdig;
 using Markdig.Renderers.Normalize;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
-using StarBlog.Share.Utils;
+using StarBlog.Content.Utils;
 using StarBlog.Data.Models;
-using StarBlog.Share.Extensions.Markdown;
+using StarBlog.Content.Extensions.Markdown;
 using StarBlog.Web.ViewModels;
 using StarBlog.Web.Criteria;
 using X.PagedList;

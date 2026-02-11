@@ -1,8 +1,8 @@
-﻿using CodeLab.Share.ViewModels.Response;
+using CodeLab.Share.ViewModels.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StarBlog.Data.Models;
-using StarBlog.Share.Extensions;
+using StarBlog.Content.Extensions;
 using StarBlog.Web.Extensions;
 using StarBlog.Web.Services;
 using StarBlog.Web.ViewModels.Auth;

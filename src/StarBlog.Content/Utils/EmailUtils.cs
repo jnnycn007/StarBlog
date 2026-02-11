@@ -1,10 +1,10 @@
-﻿using MailKit;
+using MailKit;
 using MailKit.Net.Proxy;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 
-namespace StarBlog.Share.Utils;
+namespace StarBlog.Content.Utils;
 
 public class EmailAccountConfig {
     public string Host { get; set; }
@@ -26,8 +26,8 @@ public static class EmailUtils {
         return await SendEmailAsync(config,
             new MimeMessage {
                 Subject = subject,
-                From = {new MailboxAddress(fromName, config.FromAddress)},
-                To = {new MailboxAddress(toName, toAddress)},
+                From = { new MailboxAddress(fromName, config.FromAddress) },
+                To = { new MailboxAddress(toName, toAddress) },
                 Body = new BodyBuilder {
                     HtmlBody = htmlBody
                 }.ToMessageBody()
@@ -35,12 +35,16 @@ public static class EmailUtils {
         );
     }
 
-    public static async Task<MessageSentEventArgs> SendEmailAsync(EmailAccountConfig config, MimeMessage message,
-        HttpProxyClient? proxyClient = null) {
+    public static async Task<MessageSentEventArgs> SendEmailAsync(
+        EmailAccountConfig config,
+        MimeMessage message,
+        HttpProxyClient? proxyClient = null
+    ) {
         MessageSentEventArgs result = null;
         using var client = new SmtpClient {
             ServerCertificateValidationCallback = (s, c, h, e) => true,
         };
+
         if (proxyClient != null) {
             client.ProxyClient = proxyClient;
         }

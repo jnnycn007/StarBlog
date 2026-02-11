@@ -1,9 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FreeSql;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using StarBlog.Share.Utils;
+using StarBlog.Content.Utils;
 using StarBlog.Data.Models;
 using StarBlog.Web.ViewModels.Photography;
 using X.PagedList;

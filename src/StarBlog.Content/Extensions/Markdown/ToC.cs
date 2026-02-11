@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
+using System.Text;
 using Markdig;
 using Markdig.Extensions.AutoIdentifiers;
 using Markdig.Renderers.Html;
@@ -7,7 +6,7 @@ using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 using StarBlog.Data.Models;
 
-namespace StarBlog.Share.Extensions.Markdown;
+namespace StarBlog.Content.Extensions.Markdown;
 
 class Heading {
     public int Id { get; set; }
@@ -46,10 +45,9 @@ public static class ToC {
         var document = Markdig.Markdown.Parse(post.Content, pipeline);
 
         // Markdig 中获取标题 ID 的正确方式是通过 GetAttributes() 方法，但需要在渲染完成后才能获取。
-        // 因为 ID 的生成是在 HeadingBlock_ProcessInlinesEnd 阶段完成的 (参考源码: src\Markdig\Extensions\AutoIdentifiers\AutoIdentifierExtension.cs)
+        // 因为 ID 的生成是在 HeadingBlock_ProcessInlinesEnd 阶段完成的 (参考源码: src\\Markdig\\Extensions\\AutoIdentifiers\\AutoIdentifierExtension.cs)
         _ = document.ToHtml(pipeline);
 
-        // 1. 先将所有标题转换为扁平结构
         var headings = document.Descendants<HeadingBlock>()
             .Select((heading, index) => new Heading {
                 Id = index,
@@ -59,11 +57,9 @@ public static class ToC {
             })
             .ToList();
 
-        // 2. 建立父子关系
         for (var i = 0; i < headings.Count; i++) {
             var current = headings[i];
-            // 向前查找第一个级别小于当前标题的标题作为父标题
-            for (int j = i - 1; j >= 0; j--) {
+            for (var j = i - 1; j >= 0; j--) {
                 if (headings[j].Level < current.Level) {
                     current.Pid = headings[j].Id;
                     break;
@@ -71,7 +67,6 @@ public static class ToC {
             }
         }
 
-        // 3. 转换为树状结构
         var tocNodes = new List<TocNode>();
         var nodeMap = new Dictionary<int, TocNode>();
 
@@ -83,15 +78,11 @@ public static class ToC {
             nodeMap[heading.Id] = node;
 
             if (heading.Pid == -1) {
-                // 根节点
                 tocNodes.Add(node);
             }
             else {
-                // 子节点
                 var parentNode = nodeMap[heading.Pid];
-                if (parentNode.Nodes == null) {
-                    parentNode.Nodes = new List<TocNode>();
-                }
+                parentNode.Nodes ??= new List<TocNode>();
                 parentNode.Nodes.Add(node);
             }
         }

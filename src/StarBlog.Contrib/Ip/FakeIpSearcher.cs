@@ -1,11 +1,11 @@
-﻿using System.Net;
+using System.Net;
 using IP2Region.Net.Abstractions;
 
-namespace StarBlog.Web.Services.VisitRecordServices;
+namespace StarBlog.Contrib.Ip;
 
-public class FakeIpSearcher : ISearcher {
+public sealed class FakeIpSearcher : ISearcher {
     private const string FakeResult = "0|0|0|0|0";
-    
+
     public string? Search(string ipStr) => FakeResult;
 
     public string? Search(IPAddress ipAddress) => FakeResult;

@@ -1,4 +1,4 @@
-﻿using System.Linq.Dynamic.Core;
+using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using StarBlog.Data;
 using StarBlog.Data.Models;
@@ -9,11 +9,11 @@ using X.PagedList;
 
 namespace StarBlog.Web.Services.VisitRecordServices;
 
-public class VisitRecordService {
-    private readonly ILogger<VisitRecordService> _logger;
+public class VisitRecordAnalyticsService {
+    private readonly ILogger<VisitRecordAnalyticsService> _logger;
     private readonly AppDbContext _dbContext;
 
-    public VisitRecordService(ILogger<VisitRecordService> logger, AppDbContext dbContext) {
+    public VisitRecordAnalyticsService(ILogger<VisitRecordAnalyticsService> logger, AppDbContext dbContext) {
         _logger = logger;
         _dbContext = dbContext;
     }

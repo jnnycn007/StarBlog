@@ -1,4 +1,4 @@
-﻿using CodeLab.Share.ViewModels.Response;
+using CodeLab.Share.ViewModels.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StarBlog.Data.Models;
@@ -17,9 +17,9 @@ namespace StarBlog.Web.Apis.Admin;
 [Route("Api/[controller]")]
 [ApiExplorerSettings(GroupName = ApiGroups.Admin)]
 public class VisitRecordController : ControllerBase {
-    private readonly VisitRecordService _service;
+    private readonly VisitRecordAnalyticsService _service;
 
-    public VisitRecordController(VisitRecordService service) {
+    public VisitRecordController(VisitRecordAnalyticsService service) {
         _service = service;
     }
 

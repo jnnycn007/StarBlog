@@ -1,12 +1,13 @@
-﻿using IP2Region.Net.Abstractions;
+using IP2Region.Net.Abstractions;
 using IP2Region.Net.XDB;
+using StarBlog.Contrib.Ip;
 using StarBlog.Web.Services.VisitRecordServices;
 
 namespace StarBlog.Web.Extensions;
 
 public static class ConfigureVisitRecord {
     public static IServiceCollection AddVisitRecord(this IServiceCollection services) {
-        services.AddScoped<VisitRecordService>();
+        services.AddScoped<VisitRecordAnalyticsService>();
         services.AddSingleton<VisitRecordQueueService>();
         services.AddHostedService<VisitRecordWorker>();
         

@@ -1,6 +1,6 @@
-﻿using StarBlog.Share.Utils;
+using StarBlog.Content.Utils;
 
-namespace StarBlog.Share.Extensions;
+namespace StarBlog.Content.Extensions;
 
 public static class StringExt {
     public static string Limit(this string str, int length) {

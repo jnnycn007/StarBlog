@@ -17,8 +17,8 @@ using OS = StarBlog.Data.Models.OS;
 
 namespace DataProc.Services;
 
-public class VisitRecordService(
-    ILogger<VisitRecordService> logger,
+public class VisitRecordEnrichmentService(
+    ILogger<VisitRecordEnrichmentService> logger,
     IOptions<AppSettings> options,
     IConfiguration conf,
     ISearcher searcher,

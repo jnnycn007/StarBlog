@@ -1,7 +1,7 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 
-namespace StarBlog.Share.Utils;
+namespace StarBlog.Content.Utils;
 
 /// <summary>
 /// 哈希工具
@@ -14,7 +14,6 @@ public static class HashUtils {
             sb.Append(item.ToString("x2"));
         }
 
-        // Return the hexadecimal string.
         return sb.ToString();
     }
 
@@ -27,7 +26,7 @@ public static class HashUtils {
         using var algo = SHA384.Create();
         return ComputeHash(algo, source);
     }
-    
+
     public static string ComputeSHA512Hash(string source) {
         using var algo = SHA512.Create();
         return ComputeHash(algo, source);

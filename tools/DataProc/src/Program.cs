@@ -1,4 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+// See https://aka.ms/new-console-template for more information
 
 using IP2Region.Net.Abstractions;
 using IP2Region.Net.XDB;
@@ -33,7 +33,7 @@ if (!string.IsNullOrEmpty(ip2RegionPath) && File.Exists(ip2RegionPath)) {
     ));
 }
 else {
-    app.Services.AddSingleton<ISearcher>(new FakeIpSearcher());
+    app.Services.AddSingleton<ISearcher>(new StarBlog.Contrib.Ip.FakeIpSearcher());
 }
 
 app.Services.AddAutoMapper(typeof(Program));
@@ -44,7 +44,7 @@ Console.WriteLine("           StarBlog 数据处理工具");
 Console.WriteLine();
 Console.WriteLine("请选择要运行的服务:");
 Console.WriteLine();
-Console.WriteLine("  1. VisitRecordService    - 访问记录处理");
+Console.WriteLine("  1. VisitRecordEnrichment - 访问记录处理");
 Console.WriteLine("  2. ImageOptimizer        - 图片优化");
 Console.WriteLine("  3. SlugGenerator         - URL Slug 生成");
 Console.WriteLine("  4. SummaryGenerator      - 文章摘要生成");
@@ -64,7 +64,7 @@ switch (choice) {
         return;
     case "1":
         Console.WriteLine("正在启动访问记录处理服务...");
-        await app.Run<VisitRecordService>();
+        await app.Run<VisitRecordEnrichmentService>();
         break;
     case "2":
         Console.WriteLine("正在启动图片优化服务...");
