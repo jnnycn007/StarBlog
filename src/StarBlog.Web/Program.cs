@@ -74,11 +74,13 @@ builder.Services.AddCors(options => {
         policyBuilder.AllowAnyHeader();
         policyBuilder.AllowAnyMethod();
         // policyBuilder.AllowAnyOrigin();
-        policyBuilder.WithOrigins("http://localhost:3000");
-        policyBuilder.WithOrigins("http://localhost:8080");
-        policyBuilder.WithOrigins("http://localhost:8081");
-        policyBuilder.WithOrigins("https://deali.cn");
-        policyBuilder.WithOrigins("https://blog.deali.cn");
+        policyBuilder.WithOrigins(
+            "http://localhost:3000",
+            "http://localhost:8080",
+            "http://localhost:8081",
+            "https://deali.cn",
+            "https://blog.deali.cn"
+        );
     });
 });
 builder.Services.AddStaticRobotsTxt(opt => {
