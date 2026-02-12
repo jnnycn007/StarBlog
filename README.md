@@ -105,16 +105,56 @@ StarBlog 不仅仅是一个博客系统，它正在发展成为一个完整的�
 ```
 StarBlog/
 ├── src/
+│   ├── StarBlog.Api/       # 纯 WebAPI（HTTP 层/组合根：Controllers + Middlewares + DI）
+│   ├── StarBlog.Application/ # 应用层（用例编排/应用服务/DTO/后台任务等，供 StarBlog.Api 使用）
 │   ├── StarBlog.Infrastructure/ # 通用基础设施（诊断/杂项能力）
 │   ├── StarBlog.Content/   # 内容处理（Markdown/ToC/导入处理等）
 │   ├── StarBlog.Data/      # 数据模型与数据访问层（EF Core + FreeSql）
-│   └── StarBlog.Web/       # 主 Web 应用（MVC/Razor + API）
+│   └── StarBlog.Web/       # 主 Web 应用（MVC/Razor + API，历史路径，当前不做改动）
 ├── tools/
 │   ├── MarkdownImporter/   # 博客文章导入 CLI 工具（原 StarBlog.Migrate）
 │   ├── DataProc/           # 数据处理工具（访问日志补全/图片优化/摘要等）
 │   └── BlogImageOptimizer/ # 图片优化工具
 └── demo/                   # 演示/实验项目（与主产品隔离）
 ```
+
+### 分层与职责（DDD/清洁架构取向）
+
+这套拆分更接近“DDD 的分层思想/清洁架构”的方向：将 HTTP 适配层与“用例编排（Application Layer）”解耦，便于在不影响对外 API 的情况下演进业务逻辑与基础设施。
+
+#### 当前分层（已落地）
+
+```
+StarBlog.Api (Presentation / Delivery)
+  └─ 依赖 → StarBlog.Application (Application Layer)
+             └─ 依赖 → StarBlog.Data / StarBlog.Infrastructure / StarBlog.Content
+```
+
+- **StarBlog.Api**
+  - 仅负责 HTTP：Controllers、鉴权/Swagger/HealthChecks 中间件、DI 组合根、路由与跨域策略等。
+  - 不承载业务规则与复杂编排，保持“薄控制器”。
+- **StarBlog.Application**
+  - 承载应用层：应用服务（Use Case 编排）、DTO/ViewModels、查询参数对象、后台任务（Outbox/VisitRecord Worker 等）。
+  - 目标是“稳定业务行为 + 可测试”，同时避免依赖 StarBlog.Api（依赖方向单向）。
+
+#### 这是不是 DDD？
+
+- **是 DDD 的“分层思想”方向**：当前的 `StarBlog.Application` 基本对应 DDD 的 Application Layer；`StarBlog.Api` 对应 Presentation/Interface Adapter。
+- **但还不是“完整 DDD”**（现状是“分层架构 + 领域尚未显式化”）：
+  - 还没有独立的 `StarBlog.Domain` 模块来表达聚合/值对象/领域服务/领域事件等。
+  - `StarBlog.Data.Models` 仍然承担了大部分领域模型（更偏“持久化模型/贫血模型”），仓储抽象也未完全与基础设施解耦。
+
+#### 推荐的演进路径（可选）
+
+如果后续希望更贴近 DDD（或 Clean Architecture 的经典分层），可以逐步引入：
+
+```
+StarBlog.Api → StarBlog.Application → StarBlog.Domain
+                                 ↘  (接口) ↙
+                       StarBlog.Infrastructure / StarBlog.Data (实现)
+```
+
+核心原则：依赖朝内（业务规则更稳定的层不依赖更易变的层），HTTP/数据库/第三方服务都在边缘层实现与替换。
 
 ## 🚀 快速开始
 
