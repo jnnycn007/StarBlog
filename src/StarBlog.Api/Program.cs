@@ -2,7 +2,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using StarBlog.Application.Contrib.SiteMessage;
+using StarBlog.Application.Abstractions;
 using StarBlog.Api.Filters;
+using StarBlog.Api.Adapters;
+using StarBlog.Api.Services.OutboxServices;
 using StarBlog.Application.Services;
 using StarBlog.Application.Services.OutboxServices;
 using StarBlog.Data;
@@ -89,6 +92,10 @@ builder.Services.AddAuth(builder.Configuration);
 
 // ImageSharp：保留现有图片处理能力（例如图片相关服务与中间件链路）
 builder.Services.AddImageSharp();
+
+builder.Services.AddSingleton<IAppPathProvider, AspNetAppPathProvider>();
+builder.Services.AddSingleton<IFileStorage, PhysicalFileStorage>();
+builder.Services.AddSingleton<IClock, SystemClock>();
 
 // 应用层服务：为了保证 API 行为与 StarBlog.Web 一致，首轮迁移直接沿用既有 Service 列表
 builder.Services.AddSingleton<CommonService>();

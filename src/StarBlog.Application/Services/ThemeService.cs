@@ -1,3 +1,5 @@
+using StarBlog.Application.Abstractions;
+
 namespace StarBlog.Application.Services;
 
 public class ThemeService {
@@ -8,8 +10,8 @@ public class ThemeService {
         new Theme {Name = BootstrapTheme, Path = "", CssUrl = ""}
     };
 
-    public ThemeService(IWebHostEnvironment env) {
-        var themePath = Path.Combine(env.WebRootPath, "lib", "bootswatch", "dist");
+    public ThemeService(IAppPathProvider paths) {
+        var themePath = Path.Combine(paths.WebRootPath, "lib", "bootswatch", "dist");
         if (!Directory.Exists(themePath)) {
             return;
         }

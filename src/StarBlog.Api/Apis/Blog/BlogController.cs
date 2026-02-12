@@ -84,7 +84,8 @@ public class BlogController : ControllerBase {
         if (category == null) return ApiResponse.BadRequest($"分类 {dto.CategoryId} 不存在！");
 
         try {
-            return new ApiResponse<Post>(await _blogService.Upload(dto, file));
+            await using var stream = file.OpenReadStream();
+            return new ApiResponse<Post>(await _blogService.Upload(dto, stream));
         }
         catch (Exception ex) {
             _logger.LogError(ex, "解压文件出错：{message}", ex.Message);

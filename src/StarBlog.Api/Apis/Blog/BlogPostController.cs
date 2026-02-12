@@ -119,7 +119,8 @@ public class BlogPostController : ControllerBase {
     public async Task<ApiResponse> UploadImage(string id, IFormFile file) {
         var post = await _postService.GetById(id);
         if (post == null) return ApiResponse.NotFound($"博客 {id} 不存在");
-        var imgUrl = await _postService.UploadImage(post, file);
+        await using var stream = file.OpenReadStream();
+        var imgUrl = await _postService.UploadImage(post, stream, file.FileName);
         return ApiResponse.Ok(new {
             imgUrl,
             imgName = Path.GetFileNameWithoutExtension(imgUrl)

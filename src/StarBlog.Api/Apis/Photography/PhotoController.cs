@@ -66,7 +66,8 @@ public class PhotoController : ControllerBase {
 
     [HttpPost]
     public async Task<ApiResponse<Photo>> Add([FromForm] PhotoCreationDto dto, IFormFile file) {
-        var photo = await _photoService.Add(dto, file);
+        await using var stream = file.OpenReadStream();
+        var photo = await _photoService.Add(dto, stream);
 
         return !ModelState.IsValid
             ? ApiResponse.BadRequest(ModelState)

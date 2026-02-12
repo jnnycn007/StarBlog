@@ -7,6 +7,7 @@ using Markdig.Syntax.Inlines;
 using StarBlog.Content.Utils;
 using StarBlog.Data.Models;
 using StarBlog.Content.Extensions.Markdown;
+using StarBlog.Application.Abstractions;
 using StarBlog.Application.Criteria;
 using X.PagedList;
 
@@ -16,7 +17,8 @@ public class PostService {
     private readonly ILogger<PostService> _logger;
     private readonly IBaseRepository<Post> _postRepo;
     private readonly IBaseRepository<Category> _categoryRepo;
-    private readonly IWebHostEnvironment _environment;
+    private readonly IAppPathProvider _paths;
+    private readonly IFileStorage _fileStorage;
     private readonly ConfigService _conf;
     private readonly CommonService _commonService;
 
@@ -24,13 +26,15 @@ public class PostService {
 
     public PostService(IBaseRepository<Post> postRepo,
         IBaseRepository<Category> categoryRepo,
-        IWebHostEnvironment environment,
+        IAppPathProvider paths,
+        IFileStorage fileStorage,
         ConfigService conf,
         CommonService commonService,
         ILogger<PostService> logger) {
         _postRepo = postRepo;
         _categoryRepo = categoryRepo;
-        _environment = environment;
+        _paths = paths;
+        _fileStorage = fileStorage;
         _conf = conf;
         _commonService = commonService;
         _logger = logger;
@@ -85,19 +89,14 @@ public class PostService {
     /// <summary>
     /// 指定文章上传图片
     /// </summary>
-    public async Task<string> UploadImage(Post post, IFormFile file) {
-        InitPostMediaDir(post);
+    public async Task<string> UploadImage(Post post, Stream fileStream, string originalFileName) {
+        await _fileStorage.EnsureDirectoryAsync(Path.Combine("media", "blog", post.Id));
 
         // 直接生成唯一文件名，不保留原始文件名了。——2023-6-5 21:21:46
-        var filename = GuidUtils.GuidTo16String() + Path.GetExtension(file.FileName);
+        var filename = GuidUtils.GuidTo16String() + Path.GetExtension(originalFileName);
         var fileRelativePath = Path.Combine("media", "blog", post.Id, filename);
-        var savePath = Path.Combine(_environment.WebRootPath, fileRelativePath);
-
-        await using (var fs = new FileStream(savePath, FileMode.Create)) {
-            await file.CopyToAsync(fs);
-        }
-
-        return Path.Combine(Host, fileRelativePath);
+        await _fileStorage.SaveAsync(fileRelativePath, fileStream);
+        return $"{Host}/{fileRelativePath.Replace('\\', '/')}";
     }
 
     /// <summary>
@@ -105,9 +104,9 @@ public class PostService {
     /// </summary>
     public List<string> GetImages(Post post) {
         var data = new List<string>();
-        var postDir = InitPostMediaDir(post);
-        foreach (var file in Directory.GetFiles(postDir)) {
-            data.Add(Path.Combine(Host, "media", "blog", post.Id, Path.GetFileName(file)));
+        var files = _fileStorage.ListFilesAsync(Path.Combine("media", "blog", post.Id)).GetAwaiter().GetResult();
+        foreach (var file in files) {
+            data.Add($"{Host}/media/blog/{post.Id}/{file}");
         }
 
         return data;
@@ -175,8 +174,8 @@ public class PostService {
     /// <param name="post"></param>
     /// <returns></returns>
     private string InitPostMediaDir(Post post) {
-        var blogMediaDir = Path.Combine(_environment.WebRootPath, "media", "blog");
-        var postMediaDir = Path.Combine(_environment.WebRootPath, "media", "blog", post.Id);
+        var blogMediaDir = Path.Combine(_paths.WebRootPath, "media", "blog");
+        var postMediaDir = Path.Combine(_paths.WebRootPath, "media", "blog", post.Id);
         if (!Directory.Exists(blogMediaDir)) Directory.CreateDirectory(blogMediaDir);
         if (!Directory.Exists(postMediaDir)) Directory.CreateDirectory(postMediaDir);
 
@@ -253,7 +252,7 @@ public class PostService {
 
                 // 下载图片
                 _logger.LogDebug("文章：{Title}，下载图片：{Url}", post.Title, imgUrl);
-                var savePath = Path.Combine(_environment.WebRootPath, "media", "blog", post.Id!);
+                var savePath = Path.Combine(_paths.WebRootPath, "media", "blog", post.Id!);
                 var fileName = await _commonService.DownloadFileAsync(imgUrl, savePath);
                 linkInline.Url = fileName;
             }

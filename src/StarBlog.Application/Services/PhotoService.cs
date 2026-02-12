@@ -5,6 +5,7 @@ using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using StarBlog.Content.Utils;
 using StarBlog.Data.Models;
+using StarBlog.Application.Abstractions;
 using StarBlog.Application.ViewModels.Photography;
 using X.PagedList;
 
@@ -13,13 +14,15 @@ namespace StarBlog.Application.Services;
 public class PhotoService {
     private readonly IBaseRepository<Photo> _photoRepo;
     private readonly IBaseRepository<FeaturedPhoto> _featuredPhotoRepo;
-    private readonly IWebHostEnvironment _environment;
+    private readonly IAppPathProvider _paths;
+    private readonly IClock _clock;
     private readonly IMapper _mapper;
 
-    public PhotoService(IBaseRepository<Photo> photoRepo, IWebHostEnvironment environment,
+    public PhotoService(IBaseRepository<Photo> photoRepo, IAppPathProvider paths, IClock clock,
         IBaseRepository<FeaturedPhoto> featuredPhotoRepo, IMapper mapper) {
         _photoRepo = photoRepo;
-        _environment = environment;
+        _paths = paths;
+        _clock = clock;
         _featuredPhotoRepo = featuredPhotoRepo;
         _mapper = mapper;
     }
@@ -94,26 +97,28 @@ public class PhotoService {
         return photo;
     }
 
-    public async Task<Photo> Add(PhotoCreationDto dto, IFormFile photoFile) {
+    public async Task<Photo> Add(PhotoCreationDto dto, Stream photoStream) {
         var photoId = GuidUtils.GuidTo16String();
         var photo = new Photo {
             Id = photoId,
             Title = dto.Title,
-            CreateTime = DateTime.Now,
+            CreateTime = _clock.Now,
             Location = dto.Location,
             FilePath = $"{photoId}.jpg"
         };
 
         var savePath = GetPhotoFilePath(photo);
 
-        // 如果图片超出大小限制则需要先调整
-        var resizeFlag = await ResizePhoto(photoFile.OpenReadStream(), savePath);
+        await using var buffered = new MemoryStream();
+        await photoStream.CopyToAsync(buffered);
+        buffered.Position = 0;
 
-        // 没调整过大小则直接保存上传的图片
+        var resizeFlag = await ResizePhoto(buffered, savePath);
+
         if (!resizeFlag) {
-            await using (var fs = new FileStream(savePath, FileMode.Create)) {
-                await photoFile.CopyToAsync(fs);
-            }
+            buffered.Position = 0;
+            await using var fs = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None);
+            await buffered.CopyToAsync(fs);
         }
 
         photo = await BuildPhotoData(photo);
@@ -183,7 +188,7 @@ public class PhotoService {
     /// </summary>
     public async Task<List<Photo>> BatchImport() {
         var result = new List<Photo>();
-        var importPath = Path.Combine(_environment.WebRootPath, "assets", "photography");
+        var importPath = Path.Combine(_paths.WebRootPath, "assets", "photography");
         var root = new DirectoryInfo(importPath);
         foreach (var file in root.GetFiles()) {
             var photoId = GuidUtils.GuidTo16String();
@@ -191,7 +196,7 @@ public class PhotoService {
             var photo = new Photo {
                 Id = photoId,
                 Title = filename,
-                CreateTime = DateTime.Now,
+                CreateTime = _clock.Now,
                 Location = filename,
                 FilePath = $"{photoId}.jpg"
             };
@@ -217,7 +222,7 @@ public class PhotoService {
     /// 初始化照片资源目录
     /// </summary>
     private string InitPhotoMediaDir() {
-        var dir = Path.Combine(_environment.WebRootPath, "media", "photography");
+        var dir = Path.Combine(_paths.WebRootPath, "media", "photography");
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
         return dir;

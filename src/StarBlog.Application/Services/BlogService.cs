@@ -4,12 +4,14 @@ using FreeSql;
 using StarBlog.Content.Utils;
 using StarBlog.Data.Models;
 using StarBlog.Content;
+using StarBlog.Application.Abstractions;
 using StarBlog.Application.ViewModels.Blog;
 
 namespace StarBlog.Application.Services;
 
 public class BlogService {
-    private readonly IWebHostEnvironment _environment;
+    private readonly IAppPathProvider _paths;
+    private readonly IClock _clock;
     private readonly IBaseRepository<Post> _postRepo;
     private readonly IBaseRepository<Category> _categoryRepo;
     private readonly IBaseRepository<Photo> _photoRepo;
@@ -20,7 +22,7 @@ public class BlogService {
 
     public BlogService(IBaseRepository<TopPost> topPostRepo, IBaseRepository<FeaturedPost> fPostRepo, IBaseRepository<Post> postRepo,
         IBaseRepository<Category> categoryRepo, IBaseRepository<Photo> photoRepo, IBaseRepository<FeaturedCategory> fCategoryRepo,
-        IBaseRepository<FeaturedPhoto> fPhotoRepo, IWebHostEnvironment environment) {
+        IBaseRepository<FeaturedPhoto> fPhotoRepo, IAppPathProvider paths, IClock clock) {
         _topPostRepo = topPostRepo;
         _fPostRepo = fPostRepo;
         _postRepo = postRepo;
@@ -28,7 +30,8 @@ public class BlogService {
         _photoRepo = photoRepo;
         _fCategoryRepo = fCategoryRepo;
         _fPhotoRepo = fPhotoRepo;
-        _environment = environment;
+        _paths = paths;
+        _clock = clock;
     }
 
     /// <summary>
@@ -110,10 +113,10 @@ public class BlogService {
     /// todo 初步完成了这个功能，但太多冗余代码了，需要优化
     /// </summary>
     /// <returns></returns>
-    public async Task<Post> Upload(PostCreationDto dto, IFormFile file) {
+    public async Task<Post> Upload(PostCreationDto dto, Stream zipStream) {
         var tempFile = Path.GetTempFileName();
-        await using (var fs = new FileStream(tempFile, FileMode.Create)) {
-            await file.CopyToAsync(fs);
+        await using (var fs = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None)) {
+            await zipStream.CopyToAsync(fs);
         }
 
         var extractPath = Path.Combine(Path.GetTempPath(), "StarBlog", Guid.NewGuid().ToString());
@@ -131,13 +134,13 @@ public class BlogService {
         var post = new Post {
             Id = GuidUtils.GuidTo16String(),
             Status = "已发布",
-            Title = dto.Title ?? $"{DateTime.Now.ToLongDateString()} 文章",
+            Title = dto.Title ?? $"{_clock.Now.ToLongDateString()} 文章",
             Summary = dto.Summary,
             IsPublish = true,
             Content = content,
             Path = "",
-            CreationTime = DateTime.Now,
-            LastUpdateTime = DateTime.Now,
+            CreationTime = _clock.Now,
+            LastUpdateTime = _clock.Now,
             CategoryId = dto.CategoryId,
         };
 
@@ -158,7 +161,7 @@ public class BlogService {
             post.Categories = string.Join(",", categories.Select(a => a.Id));
         }
 
-        var assetsPath = Path.Combine(_environment.WebRootPath, "media", "blog");
+        var assetsPath = Path.Combine(_paths.WebRootPath, "media", "blog");
         var processor = new PostProcessor(extractPath, assetsPath, post);
 
         // 处理文章标题和状态
