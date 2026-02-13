@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using RobotsTxt;
 using SixLabors.ImageSharp.Web.DependencyInjection;
+using StarBlog.Application.Abstractions;
 using StarBlog.Data;
 using StarBlog.Data.Extensions;
 using StarBlog.Web.Contrib.SiteMessage;
@@ -9,6 +10,7 @@ using StarBlog.Web.Extensions;
 using StarBlog.Web.Filters;
 using StarBlog.Web.Middlewares;
 using StarBlog.Web.Services;
+using StarBlog.Web.Services.BackgroundTasks;
 using StarBlog.Web.Services.OutboxServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -115,6 +117,7 @@ builder.Services.AddSingleton<MessageService>();
 builder.Services.AddSingleton<ThemeService>();
 builder.Services.AddSingleton<TempFilterService>();
 builder.Services.AddSingleton<MonitoringService>();
+builder.Services.AddSingleton<IBackgroundTaskQueue, StarBlog.Application.Services.BackgroundTaskQueue>();
 builder.Services.AddScoped<BlogService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<CommentService>();
@@ -133,6 +136,7 @@ builder.Services.AddScoped<OutboxService>();
 builder.Services.AddScoped<OutboxProcessor>();
 builder.Services.AddScoped<IOutboxHandler, EmailSendOutboxHandler>();
 builder.Services.AddHostedService<OutboxWorker>();
+builder.Services.AddHostedService<BackgroundTaskWorker>();
 
 // 设置请求最大大小
 builder.WebHost.ConfigureKestrel(options => { options.Limits.MaxRequestBodySize = long.MaxValue; });

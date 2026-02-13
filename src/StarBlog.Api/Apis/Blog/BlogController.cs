@@ -31,9 +31,10 @@ public class BlogController : ControllerBase {
     /// </summary>
     /// <returns></returns>
     [HttpGet("Top")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<Post?>))]
-    public async Task<Post?> GetTopOnePost() {
-        return await _blogService.GetTopOnePost();
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<PostDto?>))]
+    public async Task<PostDto?> GetTopOnePost() {
+        var post = await _blogService.GetTopOnePost();
+        return post == null ? null : PostDto.From(post);
     }
 
     /// <summary>
@@ -41,9 +42,10 @@ public class BlogController : ControllerBase {
     /// </summary>
     /// <returns></returns>
     [HttpGet("Featured")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<Post>>))]
-    public async Task<List<Post>> GetFeaturedPosts() {
-        return await _blogService.GetFeaturedPosts();
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponse<List<PostDto>>))]
+    public async Task<List<PostDto>> GetFeaturedPosts() {
+        var posts = await _blogService.GetFeaturedPosts();
+        return posts.Select(PostDto.From).ToList();
     }
 
     /// <summary>
@@ -73,7 +75,7 @@ public class BlogController : ControllerBase {
     /// <returns></returns>
     [Authorize]
     [HttpPost("[action]")]
-    public async Task<ApiResponse<Post>> Upload([FromForm] PostCreationDto dto, IFormFile file,
+    public async Task<ApiResponse<PostDto>> Upload([FromForm] PostCreationDto dto, IFormFile file,
         [FromServices] CategoryService categoryService
     ) {
         if (!file.FileName.EndsWith(".zip")) {
@@ -85,7 +87,8 @@ public class BlogController : ControllerBase {
 
         try {
             await using var stream = file.OpenReadStream();
-            return new ApiResponse<Post>(await _blogService.Upload(dto, stream));
+            var post = await _blogService.Upload(dto, stream);
+            return new ApiResponse<PostDto>(PostDto.From(post));
         }
         catch (Exception ex) {
             _logger.LogError(ex, "解压文件出错：{message}", ex.Message);

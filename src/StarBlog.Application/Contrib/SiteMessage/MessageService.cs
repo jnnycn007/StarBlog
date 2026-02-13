@@ -1,39 +1,16 @@
 namespace StarBlog.Application.Contrib.SiteMessage; 
 
 public class MessageService {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IMessageStore _store;
     private const string DefaultTitle = "提示信息";
-    private const string SessionKey = "message-service-id";
-    private Dictionary<string, Queue<Message>> MessageQueues { get; } = new();
 
-    public MessageService(IHttpContextAccessor httpContextAccessor) {
-        _httpContextAccessor = httpContextAccessor;
+    public MessageService(IMessageStore store) {
+        _store = store;
     }
-
-    public HttpContext? HttpContext => _httpContextAccessor.HttpContext;
 
     public Queue<Message> CurrentQueue {
         get {
-            if (HttpContext == null) {
-                throw new Exception("There is no active HttpContext. / 当前没有活动的 HttpContext。");
-            }
-
-            var id = HttpContext.Session.GetString(SessionKey);
-            if (id == null) {
-                id = Guid.NewGuid().ToString();
-                HttpContext.Session.SetString(SessionKey, id);
-            }
-
-            Queue<Message> queue;
-            if (MessageQueues.TryGetValue(id, out var messageQueue)) {
-                queue = messageQueue;
-            }
-            else {
-                queue = new Queue<Message>();
-                MessageQueues[id] = queue;
-            }
-
-            return queue;
+            return _store.GetQueue();
         }
     }
 

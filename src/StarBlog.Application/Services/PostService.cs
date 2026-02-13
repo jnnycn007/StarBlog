@@ -21,6 +21,8 @@ public class PostService {
     private readonly IFileStorage _fileStorage;
     private readonly ConfigService _conf;
     private readonly CommonService _commonService;
+    private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     private string Host => _conf["host"];
 
@@ -30,6 +32,8 @@ public class PostService {
         IFileStorage fileStorage,
         ConfigService conf,
         CommonService commonService,
+        IBackgroundTaskQueue backgroundTaskQueue,
+        IServiceScopeFactory scopeFactory,
         ILogger<PostService> logger) {
         _postRepo = postRepo;
         _categoryRepo = categoryRepo;
@@ -37,6 +41,8 @@ public class PostService {
         _fileStorage = fileStorage;
         _conf = conf;
         _commonService = commonService;
+        _backgroundTaskQueue = backgroundTaskQueue;
+        _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
@@ -73,10 +79,16 @@ public class PostService {
             post = await _postRepo.InsertAsync(post);
         }
 
-        // 检查文章中的外部图片，下载并进行替换
-        // todo 将外部图片下载放到异步任务中执行，以免保存文章的时候太慢
-        post.Content = await MdExternalUrlDownloadAsync(post);
-        // 修改文章时，将markdown中的图片地址替换成相对路径再保存
+        if (ContainsExternalImages(post)) {
+            var postIdForJob = post.Id;
+            await _backgroundTaskQueue.QueueBackgroundWorkItemAsync(async cancellationToken => {
+                using var scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<PostService>();
+                await service.LocalizeExternalImagesAsync(postIdForJob, cancellationToken);
+            });
+        }
+
+        // 修改文章时，将markdown中的本站图片地址替换成相对路径再保存
         post.Content = MdImageLinkConvert(post, false);
         // todo 修改文章时，要同时重新生成分类层级
 
@@ -84,6 +96,22 @@ public class PostService {
         // 处理完内容再更新一次
         await _postRepo.UpdateAsync(post);
         return post;
+    }
+
+    public async Task LocalizeExternalImagesAsync(string postId, CancellationToken cancellationToken = default) {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrWhiteSpace(postId)) return;
+
+        var post = await _postRepo.Where(a => a.Id == postId).FirstAsync();
+        if (post == null) return;
+        if (!ContainsExternalImages(post)) return;
+
+        post.Content = await MdExternalUrlDownloadAsync(post);
+        post.Content = MdImageLinkConvert(post, false);
+        post.LastUpdateTime = DateTime.Now;
+
+        cancellationToken.ThrowIfCancellationRequested();
+        await _postRepo.UpdateAsync(post);
     }
 
     /// <summary>
@@ -211,7 +239,9 @@ public class PostService {
                 }
                 // 设置成相对链接
                 else {
-                    linkInline.Url = Path.GetFileName(imgUrl);
+                    if (imgUrl.StartsWith(Host)) {
+                        linkInline.Url = Path.GetFileName(imgUrl);
+                    }
                 }
             }
         }
@@ -220,6 +250,28 @@ public class PostService {
         var render = new NormalizeRenderer(writer);
         render.Render(document);
         return writer.ToString();
+    }
+
+    private bool ContainsExternalImages(Post post) {
+        if (post.Content == null) return false;
+
+        var document = Markdown.Parse(post.Content);
+        foreach (var node in document.AsEnumerable()) {
+            if (node is not ParagraphBlock { Inline: { } } paragraphBlock) continue;
+            foreach (var inline in paragraphBlock.Inline) {
+                if (inline is not LinkInline { IsImage: true } linkInline) continue;
+
+                var imgUrl = linkInline.Url;
+                if (imgUrl == null) continue;
+                if (imgUrl.StartsWith(Host)) continue;
+                if (imgUrl.StartsWith("./") || imgUrl.StartsWith("../") || imgUrl.StartsWith("/")) continue;
+                if (!imgUrl.StartsWith("http://") && !imgUrl.StartsWith("https://")) continue;
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

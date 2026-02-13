@@ -31,6 +31,7 @@ public sealed class PostServiceUploadImageTests {
         services.AddSingleton<IAppPathProvider>(new TestAppPathProvider(webRoot));
         services.AddSingleton<IFileStorage>(sp => new TestFileStorage(sp.GetRequiredService<IAppPathProvider>()));
         services.AddSingleton<IClock, TestClock>();
+        services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
         services.AddSingleton<CommonService>();
         services.AddScoped<ConfigService>();

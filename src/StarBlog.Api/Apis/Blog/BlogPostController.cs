@@ -34,30 +34,30 @@ public class BlogPostController : ControllerBase {
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<ApiResponsePaged<Post>> GetList([FromQuery] PostQueryParameters param) {
+    public async Task<ApiResponsePaged<PostDto>> GetList([FromQuery] PostQueryParameters param) {
         // 已登录则设置为管理员模式
         // todo 后续改成根据角色确定管理员
         var adminMode = User.Identity?.IsAuthenticated ?? false;
         var pagedList = await _postService.GetPagedList(param, adminMode);
-        return new ApiResponsePaged<Post> {
+        return new ApiResponsePaged<PostDto> {
             Message = "Get posts list",
-            Data = pagedList.ToList(),
+            Data = pagedList.Select(PostDto.From).ToList(),
             Pagination = pagedList.ToPaginationMetadata()
         };
     }
 
     [AllowAnonymous]
     [HttpGet("{id}")]
-    public async Task<ApiResponse<Post>> Get(string id) {
+    public async Task<ApiResponse<PostDto>> Get(string id) {
         var post = await _postService.GetById(id);
-        return post == null ? ApiResponse.NotFound() : new ApiResponse<Post>(post);
+        return post == null ? ApiResponse.NotFound() : new ApiResponse<PostDto>(PostDto.From(post));
     }
 
     [AllowAnonymous]
     [HttpGet("slug/{slug}")]
-    public async Task<ApiResponse<Post>> GetBySlug(string slug) {
+    public async Task<ApiResponse<PostDto>> GetBySlug(string slug) {
         var post = await _postService.GetBySlug(slug);
-        return post == null ? ApiResponse.NotFound() : new ApiResponse<Post>(post);
+        return post == null ? ApiResponse.NotFound() : new ApiResponse<PostDto>(PostDto.From(post));
     }
 
     [HttpDelete("{id}")]
@@ -70,7 +70,7 @@ public class BlogPostController : ControllerBase {
 
     // todo 发表文章需要同时设置已发布状态
     [HttpPost]
-    public async Task<ApiResponse<Post>> Add(PostCreationDto dto,
+    public async Task<ApiResponse<PostDto>> Add(PostCreationDto dto,
         [FromServices] CategoryService categoryService) {
         var post = _mapper.Map<Post>(dto);
         var category = await categoryService.GetById(dto.CategoryId);
@@ -88,11 +88,12 @@ public class BlogPostController : ControllerBase {
         // 获取分类的层级结构
         post.Categories = categoryService.GetCategoryBreadcrumb(category);
 
-        return new ApiResponse<Post>(await _postService.InsertOrUpdateAsync(post));
+        var saved = await _postService.InsertOrUpdateAsync(post);
+        return new ApiResponse<PostDto>(PostDto.From(saved));
     }
 
     [HttpPut("{id}")]
-    public async Task<ApiResponse<Post>> Update(string id, PostUpdateDto dto) {
+    public async Task<ApiResponse<PostDto>> Update(string id, PostUpdateDto dto) {
         var post = await _postService.GetById(id);
         if (post == null) return ApiResponse.NotFound($"博客 {id} 不存在");
 
@@ -106,7 +107,8 @@ public class BlogPostController : ControllerBase {
         // mapper.Map(source, dest) 在 dest 对象的基础上修改
         post = _mapper.Map(dto, post);
         post.LastUpdateTime = DateTime.Now;
-        return new ApiResponse<Post>(await _postService.InsertOrUpdateAsync(post));
+        var saved = await _postService.InsertOrUpdateAsync(post);
+        return new ApiResponse<PostDto>(PostDto.From(saved));
     }
 
     /// <summary>
@@ -145,11 +147,11 @@ public class BlogPostController : ControllerBase {
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpPost("{id}/[action]")]
-    public async Task<ApiResponse<FeaturedPost>> SetFeatured(string id) {
+    public async Task<ApiResponse<FeaturedPostDto>> SetFeatured(string id) {
         var post = await _postService.GetById(id);
         return post == null
             ? ApiResponse.NotFound()
-            : new ApiResponse<FeaturedPost>(await _blogService.AddFeaturedPost(post));
+            : new ApiResponse<FeaturedPostDto>(FeaturedPostDto.From(await _blogService.AddFeaturedPost(post)));
     }
 
     /// <summary>
@@ -171,10 +173,10 @@ public class BlogPostController : ControllerBase {
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpPost("{id}/[action]")]
-    public async Task<ApiResponse<TopPost>> SetTop(string id) {
+    public async Task<ApiResponse<TopPostDto>> SetTop(string id) {
         var post = await _postService.GetById(id);
         if (post == null) return ApiResponse.NotFound($"博客 {id} 不存在");
         var (data, rows) = await _blogService.SetTopPost(post);
-        return new ApiResponse<TopPost> { Data = data, Message = $"ok. deleted {rows} old topPosts." };
+        return new ApiResponse<TopPostDto> { Data = TopPostDto.From(data), Message = $"ok. deleted {rows} old topPosts." };
     }
 }

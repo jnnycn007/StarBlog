@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp.Web.DependencyInjection;
-using StarBlog.Application.Contrib.SiteMessage;
 using StarBlog.Application.Abstractions;
 using StarBlog.Api.Filters;
 using StarBlog.Api.Adapters;
+using StarBlog.Api.Services.BackgroundTasks;
 using StarBlog.Api.Services.OutboxServices;
 using StarBlog.Application.Services;
 using StarBlog.Application.Services.OutboxServices;
@@ -96,11 +96,11 @@ builder.Services.AddImageSharp();
 builder.Services.AddSingleton<IAppPathProvider, AspNetAppPathProvider>();
 builder.Services.AddSingleton<IFileStorage, PhysicalFileStorage>();
 builder.Services.AddSingleton<IClock, SystemClock>();
+builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
 // 应用层服务：为了保证 API 行为与 StarBlog.Web 一致，首轮迁移直接沿用既有 Service 列表
 builder.Services.AddSingleton<CommonService>();
 builder.Services.AddSingleton<EmailService>();
-builder.Services.AddSingleton<MessageService>();
 builder.Services.AddSingleton<ThemeService>();
 builder.Services.AddSingleton<TempFilterService>();
 builder.Services.AddSingleton<MonitoringService>();
@@ -119,6 +119,7 @@ builder.Services.AddScoped<OutboxService>();
 builder.Services.AddScoped<OutboxProcessor>();
 builder.Services.AddScoped<IOutboxHandler, EmailSendOutboxHandler>();
 builder.Services.AddHostedService<OutboxWorker>();
+builder.Services.AddHostedService<BackgroundTaskWorker>();
 
 // 上传/导入等场景可能包含大文件，放开 Kestrel 请求体大小限制（由业务逻辑自行校验）
 builder.WebHost.ConfigureKestrel(options => {

@@ -55,8 +55,8 @@ public class AuthService {
     }
 
     public User? GetUser(ClaimsPrincipal userClaim) {
-        var userId = userClaim.FindFirstValue(ClaimUserId);
-        var userName = userClaim.FindFirstValue(ClaimUserName);
+        var userId = userClaim.FindFirst(ClaimUserId)?.Value;
+        var userName = userClaim.FindFirst(ClaimUserName)?.Value;
         if (userId == null || userName == null) return null;
         return new User { Id = userId, Name = userName };
     }

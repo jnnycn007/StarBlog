@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StarBlog.Data.Models;
 using StarBlog.Api.Extensions;
-using StarBlog.Application.ViewModels;
+using StarBlog.Application.ViewModels.Blog;
 
 namespace StarBlog.Api.Apis.Blog;
 
@@ -26,26 +26,30 @@ public class FeaturedPostController : ControllerBase {
 
     [AllowAnonymous]
     [HttpGet]
-    public ApiResponse<List<FeaturedPost>> GetList() {
-        return new ApiResponse<List<FeaturedPost>>(
-            _featuredPostRepo.Select.Include(a => a.Post.Category).ToList()
-        );
+    public ApiResponse<List<FeaturedPostDto>> GetList() {
+        var data = _featuredPostRepo.Select
+            .Include(a => a.Post.Category)
+            .ToList()
+            .Select(FeaturedPostDto.From)
+            .ToList();
+        return new ApiResponse<List<FeaturedPostDto>>(data);
     }
 
     [AllowAnonymous]
     [HttpGet("{id:int}")]
-    public ApiResponse<FeaturedPost> Get(int id) {
+    public ApiResponse<FeaturedPostDto> Get(int id) {
         var item = _featuredPostRepo.Where(a => a.Id == id)
-            .Include(a => a.Post).First();
-        return item == null ? ApiResponse.NotFound() : new ApiResponse<FeaturedPost>(item);
+            .Include(a => a.Post.Category).First();
+        return item == null ? ApiResponse.NotFound() : new ApiResponse<FeaturedPostDto>(FeaturedPostDto.From(item));
     }
 
     [HttpPost]
-    public ApiResponse<FeaturedPost> Add([FromQuery] string postId) {
+    public ApiResponse<FeaturedPostDto> Add([FromQuery] string postId) {
         var post = _postRepo.Where(a => a.Id == postId).First();
         if (post == null) return ApiResponse.NotFound($"博客 {postId} 不存在");
-        var item= _featuredPostRepo.Insert(new FeaturedPost { PostId = postId });
-        return new ApiResponse<FeaturedPost>(item);
+        var item = _featuredPostRepo.Insert(new FeaturedPost { PostId = postId });
+        item.Post = post;
+        return new ApiResponse<FeaturedPostDto>(FeaturedPostDto.From(item));
     }
 
     [HttpDelete("{id:int}")]
